@@ -1,0 +1,33 @@
+# Microsoft Family Safety package
+#
+# This package assumes that Microsoft Family Safety data is exposed as
+# Home Assistant entities by a manually installed custom integration.
+#
+# Microsoft does not provide an official public Family Safety API for
+# screen-time and activity reporting. Do not store Microsoft passwords,
+# browser cookies, CSRF tokens, or child-account secrets in this repository.
+
+template:
+  - sensor:
+      - name: "Microsoft Family Safety Integration Status"
+        unique_id: microsoft_family_safety_integration_status
+        state: >
+          {% set entities = states.sensor
+            | selectattr('entity_id', 'match', 'sensor\\.(microsoft_family|family_safety|.*screen_time).*')
+            | list %}
+          {% if entities | length > 0 %}
+            detected
+          {% else %}
+            not_detected
+          {% endif %}
+        attributes:
+          matching_sensor_count: >
+            {{ states.sensor
+              | selectattr('entity_id', 'match', 'sensor\\.(microsoft_family|family_safety|.*screen_time).*')
+              | list
+              | length }}
+          matching_entity_ids: >
+            {{ states.sensor
+              | selectattr('entity_id', 'match', 'sensor\\.(microsoft_family|family_safety|.*screen_time).*')
+              | map(attribute='entity_id')
+              | list }}
